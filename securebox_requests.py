@@ -3,42 +3,127 @@ import requests
 import credenciales
 import generales
 
-def search(a_buscar):
+# En este fichero se definen las funciones auxiliares que se encargan de cada
+# una de las funcionalidades:
+#   Funciones relacionadas con la gestión de identidades
+#       /users/register - registra un usuario en el sistema
+#       /users/getPublicKey - obtiene la clave pública de un usuario
+#       /users/search - obtiene datos de un usuario por nombre o correo electrónico
+#       /user/delete - borrar un usuario
+#   Funciones relacionadas con la gestión de ficheros
+#       /files/upload - sube un fichero al sistema
+#       /files/download - descarga un fichero
+#       /files/list - lista todos los ficheros pertenecientes a un usuario
+#       /files/delete - borra un fichero
 
-    url = generales.url_servidor + '/api/users/search'
+# Funcion que registra un usuario en el sistema
+def register(nombre, email, publicKey, flag_imprimir=False):
+    url = generales.url_servidor + '/api/users/register'
+    args = {
+        'nombre': nombre,
+        'email': email,
+        'publicKey': publicKey
+    }
+    headers = {'Authorization': 'Bearer {}'.format(credenciales.my_token)}
+    # headers = {} # De momento da error al no incluir la cabecera
 
-    args = {'data_search': sys.argv[1]}
-    headers = {'Authorization': 'Bearer ' + credenciales.my_token}
+    if flag_imprimir:
+        print('Se va a registrar el usuario {} con email {} y clave pública {}'.format(nombre, email, publicKey))
 
-    print('Buscando usuario \'' + sys.argv[1] + '\' en el servidor...OK')
-    r = requests.post(url, json=args, headers=headers)
+    response = requests.post(url, json=args, headers=headers)
+    if response.status_code != 200:
+        # TODO
+        print('Error con la petición:')
+        _imprime_error(response)
+        return None
+    resultado = response.json()
 
-    # print(r.status_code)
-    # print(r.headers['content-type'])
-    # print(r.encoding)
-    # print(r.text)
-    # print(r.json())
+    return resultado
 
-    resultados = r.json()
-
-    print('Hay ' + str(len(resultados)) + ' resultados a la consulta')
-    for i in range(len(resultados)):
-        resultado = resultados[i]
-        # print(resultado)
-        print('[' + str(i + 1) + '] ' + str(resultado['nombre']) + ' ' + resultado['email'] + ' ' + resultado['userID'])
-
-
+# Funcion que se encarga de buscar un usuario por nombre o correo electrónico
 def getPublicKey(nia):
-
     url = generales.url_servidor + '/api/users/getPublicKey'
     args = {'userID': nia}
-    headers = {'Authorization': 'Bearer ' + credenciales.my_token}
+    headers = {'Authorization': 'Bearer {}'.format(credenciales.my_token)}
 
-    r = requests.post(url, json=args, headers=headers)
-
-    resultado = r.json()
+    response = requests.post(url, json=args, headers=headers)
+    if response.status_code != 200:
+        # TODO
+        print('Error con la petición:')
+        _imprime_error(response)
+        return None
+    resultado = response.json()
 
     if ('publicKey' in resultado):
         return resultado['publicKey']
     else:
         return None
+
+
+# Funcion que se encarga de buscar un usuario por nombre o correo electrónico
+def search(a_buscar, flag_imprimir=False):
+    url = generales.url_servidor + '/api/users/search'
+    args = {'data_search': a_buscar}
+    headers = {'Authorization': 'Bearer {}'.format(credenciales.my_token)}
+
+    if flag_imprimir:
+        print('Buscando usuario \'{}\' en el servidor...OK'.format(a_buscar))
+
+    response = requests.post(url, json=args, headers=headers)
+    if response.status_code != 200:
+        # TODO
+        print('Error con la petición:')
+        _imprime_error(response)
+        return None
+    resultados = response.json()
+
+    if flag_imprimir:
+        print('{} usuarios encontrados:'.format(str(len(resultados))))
+        for i in range(len(resultados)):
+            resultado = resultados[i]
+
+            nombre = str(resultado['nombre'])
+            email = resultado['email']
+            nia = resultado['userID']
+            print('[{}] {}, {}, ID: {}'.format(str(i + 1), nombre, email, nia))
+
+    return resultados
+
+# Funcion que elimina a un usuario del sistema
+def delete(nia, flag_imprimir=False):
+    url = generales.url_servidor + '/api/users/delete'
+    args = {'userID': nia}
+
+    headers = {'Authorization': 'Bearer {}'.format(credenciales.my_token)}
+
+    if flag_imprimir:
+        print('Se va a eliminar el usuario con ID {}'.format(nia))
+
+    response = requests.post(url, json=args, headers=headers)
+    if response.status_code != 200:
+        # TODO
+        print('Error con la petición:')
+        _imprime_error(response)
+        return None
+    resultado = response.json()
+
+    return resultado
+
+
+
+def _imprime_error(respuesta):
+    error = respuesta.json()
+    print('Se ha recibido el siguiente error tras una petición:')
+    print('Código error HTTP: {}'.format(error['http_error_code']))
+    print('Código error: {}'.format(error['error_code']))
+    print('Descripción: {}'.format(error['description']))
+
+# print(r.status_code)
+# print(r.headers['content-type'])
+# print(r.encoding)
+# print(r.text)
+# print(r.json())
+
+
+# curl --verbose -H "Authorization: Bearer AaFBe2d7894C1D63" -H "Content-Type: application/json" --data '{"data_search": "miguel.ar"}' -X POST http://vega.ii.uam.es:8080/api/users/register
+# curl --verbose -H "Authorization: Bearer AaFBe2d7894C1D63" -H "Content-Type: application/json" --data '{"nombre": "Miguel Arconada","email": "miguel.arconada@estudiante.uam.es","publicKey": "publicKey"}' -X POST http://vega.ii.uam.es:8080/api/users/register
