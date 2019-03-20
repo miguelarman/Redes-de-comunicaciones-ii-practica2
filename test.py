@@ -14,19 +14,19 @@ nombre_completo = 'David Cabronero'
 email = 'dabid.cabronero@estudiante.uam.es'
 
 # De momento guarda los datos fijados, no por argumentos
-usuario = register(nombre_completo, email, flag_imprimir=True)
+usuario = user_register(nombre_completo, email, verbose=True)
 if (usuario == None):
     print('Error al registrar el usuario')
     exit()
 
-usuarios = search(a_buscar, flag_imprimir=True)
+usuarios = user_search(a_buscar, verbose=True)
 if (len(usuarios) == 0):
     print('No se encontraron usuarios')
     exit()
 
 
 print('Va a buscar la public key del primer usuario de la búsqueda. Debería coincidir con la generada anteriormente')
-public_key = getPublicKey(usuarios[0]['userID'])
+public_key = user_getPublicKey(usuarios[0]['userID'])
 print(public_key)
 
 if (public_key == None):
@@ -36,12 +36,12 @@ if (public_key == None):
 exit()
 
 
-borrado = delete(nia, flag_imprimir=True)
+borrado = user_delete(nia, verbose=True)
 if borrado == None:
     print('Error al borrar el usuario')
     exit()
 
-usuarios = search(nia, flag_imprimir=True)
+usuarios = user_search(nia, verbose=True)
 if (len(usuarios) == 0):
     print('No se encontraron usuarios en la segunda consulta')
     exit()

@@ -20,7 +20,7 @@ from Crypto.PublicKey import RSA
 #       /files/delete - borra un fichero
 
 # Funcion que registra un usuario en el sistema
-def register(nombre, email, flag_imprimir=False):
+def user_register(nombre, email, verbose=False):
 
     print('Generando par de claves RSA de 2048 bits...OK')
 
@@ -44,14 +44,13 @@ def register(nombre, email, flag_imprimir=False):
         'email': email,
         'publicKey': publicKey
     }
-    headers = {'Authorization': 'Bearer {}'.format(credenciales.my_token)}
+    headers = generales.header_autorizacion
 
-    if flag_imprimir:
+    if verbose:
         print('Se va a registrar el usuario {} y con email {}'.format(nombre, email))
 
     response = requests.post(url, json=args, headers=headers)
     if response.status_code != 200:
-        # TODO
         print('Error con la petición:')
         _imprime_error(response)
         return None
@@ -60,18 +59,19 @@ def register(nombre, email, flag_imprimir=False):
     return resultado
 
 # Funcion que se encarga de buscar un usuario por nombre o correo electrónico
-def getPublicKey(nia):
+def user_getPublicKey(userID, verbose=False):
     url = generales.url_servidor + '/api/users/getPublicKey'
-    args = {'userID': nia}
-    headers = {'Authorization': 'Bearer {}'.format(credenciales.my_token)}
+    args = {'userID': userID}
+    headers = generales.header_autorizacion
 
     response = requests.post(url, json=args, headers=headers)
     if response.status_code != 200:
-        # TODO
         print('Error con la petición:')
         _imprime_error(response)
         return None
     resultado = response.json()
+
+    # TODO imprimir algo
 
     if ('publicKey' in resultado):
         return resultado['publicKey']
@@ -80,47 +80,44 @@ def getPublicKey(nia):
 
 
 # Funcion que se encarga de buscar un usuario por nombre o correo electrónico
-def search(a_buscar, flag_imprimir=False):
+def user_search(a_buscar, verbose=False):
     url = generales.url_servidor + '/api/users/search'
     args = {'data_search': a_buscar}
-    headers = {'Authorization': 'Bearer {}'.format(credenciales.my_token)}
+    headers = generales.header_autorizacion
 
-    if flag_imprimir:
+    if verbose:
         print('Buscando usuario \'{}\' en el servidor...OK'.format(a_buscar))
 
     response = requests.post(url, json=args, headers=headers)
     if response.status_code != 200:
-        # TODO
         print('Error con la petición:')
         _imprime_error(response)
         return None
     resultados = response.json()
 
-    if flag_imprimir:
+    if verbose:
         print('{} usuarios encontrados:'.format(str(len(resultados))))
         for i in range(len(resultados)):
             resultado = resultados[i]
 
             nombre = str(resultado['nombre'])
             email = resultado['email']
-            nia = resultado['userID']
-            print('[{}] {}, {}, ID: {}'.format(str(i + 1), nombre, email, nia))
+            userID = resultado['userID']
+            print('[{}] {}, {}, ID: {}'.format(str(i + 1), nombre, email, userID))
 
     return resultados
 
 # Funcion que elimina a un usuario del sistema
-def delete(nia, flag_imprimir=False):
+def user_delete(userID, verbose=False):
     url = generales.url_servidor + '/api/users/delete'
-    args = {'userID': nia}
+    args = {'userID': userID}
+    headers = generales.header_autorizacion
 
-    headers = {'Authorization': 'Bearer {}'.format(credenciales.my_token)}
-
-    if flag_imprimir:
-        print('Se va a eliminar el usuario con ID {}'.format(nia))
+    if verbose:
+        print('Se va a eliminar el usuario con ID {}'.format(userID))
 
     response = requests.post(url, json=args, headers=headers)
     if response.status_code != 200:
-        # TODO
         print('Error con la petición:')
         _imprime_error(response)
         return None

@@ -5,4 +5,4 @@ if (len(sys.argv) < 2):
     print('Introduce los datos a buscar')
     exit()
 
-search(sys.argv[1], flag_imprimir=True)
+user_search(sys.argv[1], verbose=True)

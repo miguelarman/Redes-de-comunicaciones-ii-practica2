@@ -6,4 +6,5 @@ if (len(sys.argv) < 2):
     exit()
 
 for nia in sys.argv[1:]:
-    delete(nia, flag_imprimir=True)
+    ret = user_delete(nia, verbose=True)
+    print(ret)
