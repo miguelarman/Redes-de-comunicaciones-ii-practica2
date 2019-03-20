@@ -2,3 +2,6 @@
 __pycache__
 python_tests.py
 rsa/*
+prueba.txt
+delete_nia.py
+search.py
