@@ -8,14 +8,13 @@ from securebox_requests import *
 # 4- Elimina al usuario
 # 5- Vuelve a buscarlo en el sistema
 
-a_buscar = 'miguel.arconada'
+a_buscar = 'dabid.cabronero'
 nia = '361902'
-nombre_completo = 'Miguel Arconada'
-email = 'miguel.arconada@estudiante.uam.es'
-clave_publica = 'publicKey'
+nombre_completo = 'David Cabronero'
+email = 'dabid.cabronero@estudiante.uam.es'
 
 # De momento guarda los datos fijados, no por argumentos
-usuario = register(nombre_completo, email, clave_publica, flag_imprimir=True)
+usuario = register(nombre_completo, email, flag_imprimir=True)
 if (usuario == None):
     print('Error al registrar el usuario')
     exit()
@@ -25,15 +24,17 @@ if (len(usuarios) == 0):
     print('No se encontraron usuarios')
     exit()
 
-exit()
 
-print('Va a buscar la public key del primer usuario de la búsqueda')
+print('Va a buscar la public key del primer usuario de la búsqueda. Debería coincidir con la generada anteriormente')
 public_key = getPublicKey(usuarios[0]['userID'])
 print(public_key)
 
 if (public_key == None):
     print('El usuario no dispone de clave pública')
     exit()
+
+exit()
+
 
 borrado = delete(nia, flag_imprimir=True)
 if borrado == None:

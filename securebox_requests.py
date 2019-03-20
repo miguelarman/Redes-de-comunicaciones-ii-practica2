@@ -2,6 +2,9 @@ import sys
 import requests
 import credenciales
 import generales
+import json
+from Crypto.PublicKey import RSA
+
 
 # En este fichero se definen las funciones auxiliares que se encargan de cada
 # una de las funcionalidades:
@@ -17,7 +20,24 @@ import generales
 #       /files/delete - borra un fichero
 
 # Funcion que registra un usuario en el sistema
-def register(nombre, email, publicKey, flag_imprimir=False):
+def register(nombre, email, flag_imprimir=False):
+
+    print('Generando par de claves RSA de 2048 bits...OK')
+
+    key = RSA.generate(2048)
+
+    private_key = key.export_key()
+    file_out = open("rsa/privada.pem", "wb")
+    file_out.write(private_key)
+
+    public_key = key.publickey().export_key()
+    file_out = open("rsa/publica.pem", "wb")
+    file_out.write(public_key)
+
+    publicKey = public_key.decode()
+
+    print(publicKey)
+
     url = generales.url_servidor + '/api/users/register'
     args = {
         'nombre': nombre,
@@ -25,10 +45,9 @@ def register(nombre, email, publicKey, flag_imprimir=False):
         'publicKey': publicKey
     }
     headers = {'Authorization': 'Bearer {}'.format(credenciales.my_token)}
-    # headers = {} # De momento da error al no incluir la cabecera
 
     if flag_imprimir:
-        print('Se va a registrar el usuario {} con email {} y clave pública {}'.format(nombre, email, publicKey))
+        print('Se va a registrar el usuario {} y con email {}'.format(nombre, email))
 
     response = requests.post(url, json=args, headers=headers)
     if response.status_code != 200:
@@ -112,7 +131,13 @@ def delete(nia, flag_imprimir=False):
 
 
 def _imprime_error(respuesta):
-    error = respuesta.json()
+    try:
+        error = respuesta.json()
+    except ValueError:
+        print('La respuesta no contiene datos json')
+        print(respuesta)
+        return
+
     print('Se ha recibido el siguiente error tras una petición:')
     print('Código error HTTP: {}'.format(error['http_error_code']))
     print('Código error: {}'.format(error['error_code']))
