@@ -2,6 +2,9 @@
 __pycache__
 python_tests.py
 rsa/*
-prueba.txt
+*.txt
+fichero_para_cifrar
+fichero_descifrado
+datos_cifrados.bin
 delete_nia.py
 search.py

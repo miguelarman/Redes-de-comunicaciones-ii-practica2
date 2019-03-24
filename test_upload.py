@@ -8,11 +8,13 @@ if (len(sys.argv) < 2):
     print('Especifica la ruta del archivo')
     exit()
 
-url = generales.url_servidor + '/api/files/upload'
-headers = {'Authorization': 'Bearer {}'.format(credenciales.my_token)}
-args = {'ufile': '@{}'.format(sys.argv[1])}
+ruta = sys.argv[1]
 
-response = requests.post(url, data=args, headers=headers)
+url = generales.url_servidor + '/api/files/upload'
+headers = generales.header_autorizacion
+args = {'ufile': (ruta, open(ruta, 'rb'))}
+
+response = requests.post(url, headers=headers, files=args)
 if response.status_code != 200:
     # TODO
     print('Error con la petición:')

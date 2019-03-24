@@ -5,22 +5,26 @@ import sys
 from securebox_requests import _imprime_error
 
 if (len(sys.argv) < 2):
-    print('Especifica el id del archivo a borrar')
+    print('Especifica los id del archivo a borrar')
     exit()
+
+ids = sys.argv[1:]
 
 url = generales.url_servidor + '/api/files/delete'
 headers = {'Authorization': 'Bearer {}'.format(credenciales.my_token)}
-args={'file_id': '{}'.format(sys.argv[1])}
 
-response = requests.post(url, json=args, headers=headers)
-if response.status_code != 200:
-    # TODO
-    print('Error con la petición:')
-    _imprime_error(response)
-    exit()
-    # return None
+for id in ids:
+    args={'file_id': '{}'.format(sys.argv[1])}
 
-resultado = response.json()
-print(resultado)
+    response = requests.post(url, json=args, headers=headers)
+    if response.status_code != 200:
+        # TODO
+        print('Error con la petición:')
+        _imprime_error(response)
+        exit()
+        # return None
+
+    resultado = response.json()
+    print(resultado)
 
 # return resultado
