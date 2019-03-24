@@ -1,9 +1,12 @@
 import sys
+import os
 import requests
 import credenciales
 import generales
 import json
 from Crypto.PublicKey import RSA
+
+# Falta poner los print solo cuando la flag verbose esté a true
 
 
 # En este fichero se definen las funciones auxiliares que se encargan de cada
@@ -22,9 +25,10 @@ from Crypto.PublicKey import RSA
 # Funcion que registra un usuario en el sistema
 def user_register(nombre, email, verbose=False):
 
-    print('Generando par de claves RSA de 2048 bits...OK')
-
+    print('Generando par de claves RSA de 2048 bits...', end='\r')
+    sys.stdout.flush()
     key = RSA.generate(2048)
+    print('Generando par de claves RSA de 2048 bits... OK')
 
     private_key = key.export_key()
     file_out = open("rsa/privada.pem", "wb")
@@ -48,12 +52,16 @@ def user_register(nombre, email, verbose=False):
 
     if verbose:
         print('Se va a registrar el usuario {} y con email {}'.format(nombre, email))
+        print('Registrando al usuario...', end='\r')
+        sys.stdout.flush()
 
     response = requests.post(url, json=args, headers=headers)
     if response.status_code != 200:
         print('Error con la petición:')
         _imprime_error(response)
         return None
+
+    print('Registrando al usuario... OK')
     resultado = response.json()
 
     return resultado
@@ -64,6 +72,9 @@ def user_getPublicKey(userID, verbose=False):
     args = {'userID': userID}
     headers = generales.header_autorizacion
 
+    print('Accediendo a la clave pública del usuario {}...'.format(userID), end='\r')
+    sys.stdout.flush()
+
     response = requests.post(url, json=args, headers=headers)
     if response.status_code != 200:
         print('Error con la petición:')
@@ -71,7 +82,7 @@ def user_getPublicKey(userID, verbose=False):
         return None
     resultado = response.json()
 
-    # TODO imprimir algo
+    print('Accediendo a la clave pública del usuario {}... OK'.format(userID))
 
     if ('publicKey' in resultado):
         return resultado['publicKey']
@@ -86,7 +97,8 @@ def user_search(a_buscar, verbose=False):
     headers = generales.header_autorizacion
 
     if verbose:
-        print('Buscando usuario \'{}\' en el servidor...OK'.format(a_buscar))
+        print('Buscando usuario \'{}\' en el servidor...'.format(a_buscar), end='\r')
+        sys.stdout.flush()
 
     response = requests.post(url, json=args, headers=headers)
     if response.status_code != 200:
@@ -94,6 +106,8 @@ def user_search(a_buscar, verbose=False):
         _imprime_error(response)
         return None
     resultados = response.json()
+
+    print('Buscando usuario \'{}\' en el servidor... OK'.format(a_buscar))
 
     if verbose:
         print('{} usuarios encontrados:'.format(str(len(resultados))))
@@ -114,17 +128,107 @@ def user_delete(userID, verbose=False):
     headers = generales.header_autorizacion
 
     if verbose:
-        print('Se va a eliminar el usuario con ID {}'.format(userID))
+        print('Eliminando el usuario con ID {}...'.format(userID), end='\r')
+        sys.stdout.flush()
 
     response = requests.post(url, json=args, headers=headers)
     if response.status_code != 200:
         print('Error con la petición:')
         _imprime_error(response)
         return None
+
+    print('Eliminando el usuario con ID {}... OK'.format(userID))
     resultado = response.json()
 
     return resultado
 
+def file_upload(file_path, verbose=False):
+    url = generales.url_servidor + '/api/files/upload'
+    headers = generales.header_autorizacion
+    args = {'ufile': (file_path, open(file_path, 'rb'))}
+
+    print('Subiendo archivo al servidor...', end='\r')
+    sys.stdout.flush()
+
+    response = requests.post(url, headers=headers, files=args)
+    if response.status_code != 200:
+        print('Error con la petición:')
+        _imprime_error(response)
+        return None
+
+    print('Subiendo archivo al servidor... OK')
+
+    resultado = response.json()
+    return resultado
+
+def file_download(file_id, verbose=False):
+    url = generales.url_servidor + '/api/files/download'
+    headers = generales.header_autorizacion
+    args = {'file_id': '{}'.format(file_id)}
+
+    print('Descargando fichero del servidor...', end='\r')
+    sys.stdout.flush()
+
+    response = requests.post(url, json=args, headers=headers)
+
+    if response.status_code != 200:
+        print('Error con la petición:')
+        _imprime_error(response)
+        return None
+
+    print('Descargando fichero del servidor... OK')
+
+    print('Guardando fichero...', end='\r')
+    sys.stdout.flush()
+    salida = open(file_id, 'wb')
+    salida.write(response.content)
+    salida.close()
+
+    print('Guardando fichero... OK')
+
+    writen_bytes = os.path.getsize(file_id)
+    print('{} bytes guardados correctamente'.format(writen_bytes))
+
+    return file_id
+
+def file_list(verbose=False):
+    url = generales.url_servidor + '/api/files/list'
+    headers = generales.header_autorizacion
+
+    print('Buscando ficheros en el servidor...', end='\r')
+    sys.stdout.flush()
+
+    response = requests.post(url, headers=headers)
+    if response.status_code != 200:
+        print('Error con la petición:')
+        _imprime_error(response)
+        return None
+
+    print('Buscando ficheros en el servidor... OK')
+
+    resultado = response.json()
+    print(resultado)
+    return resultado
+
+def file_delete(file_id, verbose=False):
+    url = generales.url_servidor + '/api/files/delete'
+    headers = generales.header_autorizacion
+    args={'file_id': '{}'.format(file_id)}
+
+    print('Eliminando fichero del servidor...', end='\r')
+    sys.stdout.flush()
+
+    response = requests.post(url, json=args, headers=headers)
+    if response.status_code != 200:
+        print('Error con la petición:')
+        _imprime_error(response)
+        return None
+
+    print('Eliminando fichero del servidor... OK')
+
+    resultado = response.json()
+    print(resultado)
+    return resultado
 
 
 def _imprime_error(respuesta):
@@ -139,13 +243,3 @@ def _imprime_error(respuesta):
     print('Código error HTTP: {}'.format(error['http_error_code']))
     print('Código error: {}'.format(error['error_code']))
     print('Descripción: {}'.format(error['description']))
-
-# print(r.status_code)
-# print(r.headers['content-type'])
-# print(r.encoding)
-# print(r.text)
-# print(r.json())
-
-
-# curl --verbose -H "Authorization: Bearer AaFBe2d7894C1D63" -H "Content-Type: application/json" --data '{"data_search": "miguel.ar"}' -X POST http://vega.ii.uam.es:8080/api/users/register
-# curl --verbose -H "Authorization: Bearer AaFBe2d7894C1D63" -H "Content-Type: application/json" --data '{"nombre": "Miguel Arconada","email": "miguel.arconada@estudiante.uam.es","publicKey": "publicKey"}' -X POST http://vega.ii.uam.es:8080/api/users/register

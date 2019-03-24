@@ -1,6 +1,6 @@
 *.pdf
 __pycache__
-python_tests.py
+test_python.py
 rsa/*
 *.txt
 fichero_para_cifrar
