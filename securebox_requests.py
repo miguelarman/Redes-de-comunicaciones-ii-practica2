@@ -23,24 +23,7 @@ from Crypto.PublicKey import RSA
 #       /files/delete - borra un fichero
 
 # Funcion que registra un usuario en el sistema
-def user_register(nombre, email, verbose=False):
-
-    print('Generando par de claves RSA de 2048 bits...', end='\r')
-    sys.stdout.flush()
-    key = RSA.generate(2048)
-    print('Generando par de claves RSA de 2048 bits... OK')
-
-    private_key = key.export_key()
-    file_out = open("rsa/privada.pem", "wb")
-    file_out.write(private_key)
-
-    public_key = key.publickey().export_key()
-    file_out = open("rsa/publica.pem", "wb")
-    file_out.write(public_key)
-
-    publicKey = public_key.decode()
-
-    print(publicKey)
+def user_register(nombre, email, publicKey, verbose=False):
 
     url = generales.url_servidor + '/api/users/register'
     args = {
@@ -53,7 +36,6 @@ def user_register(nombre, email, verbose=False):
     if verbose:
         print('Se va a registrar el usuario {} y con email {}'.format(nombre, email))
         print('Registrando al usuario...', end='\r')
-        sys.stdout.flush()
 
     response = requests.post(url, json=args, headers=headers)
     if response.status_code != 200:
@@ -61,10 +43,14 @@ def user_register(nombre, email, verbose=False):
         _imprime_error(response)
         return None
 
-    print('Registrando al usuario... OK')
+    if verbose:
+        print('Registrando al usuario... OK')
+
     resultado = response.json()
 
-    return resultado
+    user_id = resultado['nombre']
+
+    return user_id
 
 # Funcion que se encarga de buscar un usuario por nombre o correo electrónico
 def user_getPublicKey(userID, verbose=False):
@@ -73,7 +59,6 @@ def user_getPublicKey(userID, verbose=False):
     headers = generales.header_autorizacion
 
     print('Accediendo a la clave pública del usuario {}...'.format(userID), end='\r')
-    sys.stdout.flush()
 
     response = requests.post(url, json=args, headers=headers)
     if response.status_code != 200:
@@ -98,7 +83,6 @@ def user_search(a_buscar, verbose=False):
 
     if verbose:
         print('Buscando usuario \'{}\' en el servidor...'.format(a_buscar), end='\r')
-        sys.stdout.flush()
 
     response = requests.post(url, json=args, headers=headers)
     if response.status_code != 200:
@@ -128,8 +112,7 @@ def user_delete(userID, verbose=False):
     headers = generales.header_autorizacion
 
     if verbose:
-        print('Eliminando el usuario con ID {}...'.format(userID), end='\r')
-        sys.stdout.flush()
+        print('Eliminando el usuario...', end='\r')
 
     response = requests.post(url, json=args, headers=headers)
     if response.status_code != 200:
@@ -137,10 +120,15 @@ def user_delete(userID, verbose=False):
         _imprime_error(response)
         return None
 
-    print('Eliminando el usuario con ID {}... OK'.format(userID))
     resultado = response.json()
 
-    return resultado
+    id_borrado = resultado['userID']
+
+    print('Eliminando el usuario con... OK')
+
+    print('Se ha eliminado el usuario con ID {}'.format(id_borrado))
+
+    return id_borrado
 
 def file_upload(file_path, verbose=False):
     url = generales.url_servidor + '/api/files/upload'
@@ -148,7 +136,6 @@ def file_upload(file_path, verbose=False):
     args = {'ufile': (file_path, open(file_path, 'rb'))}
 
     print('Subiendo archivo al servidor...', end='\r')
-    sys.stdout.flush()
 
     response = requests.post(url, headers=headers, files=args)
     if response.status_code != 200:
@@ -159,7 +146,9 @@ def file_upload(file_path, verbose=False):
     print('Subiendo archivo al servidor... OK')
 
     resultado = response.json()
-    return resultado
+    file_id = resultado['file_id']
+
+    return file_id
 
 def file_download(file_id, verbose=False):
     url = generales.url_servidor + '/api/files/download'
@@ -167,7 +156,6 @@ def file_download(file_id, verbose=False):
     args = {'file_id': '{}'.format(file_id)}
 
     print('Descargando fichero del servidor...', end='\r')
-    sys.stdout.flush()
 
     response = requests.post(url, json=args, headers=headers)
 
@@ -178,25 +166,25 @@ def file_download(file_id, verbose=False):
 
     print('Descargando fichero del servidor... OK')
 
+    filename = response.headers['Content-Disposition'].split('\"')[-2]
+
     print('Guardando fichero...', end='\r')
-    sys.stdout.flush()
-    salida = open(file_id, 'wb')
+    salida = open(filename, 'wb')
     salida.write(response.content)
     salida.close()
 
     print('Guardando fichero... OK')
 
-    writen_bytes = os.path.getsize(file_id)
+    writen_bytes = os.path.getsize(filename)
     print('{} bytes guardados correctamente'.format(writen_bytes))
 
-    return file_id
+    return filename
 
 def file_list(verbose=False):
     url = generales.url_servidor + '/api/files/list'
     headers = generales.header_autorizacion
 
     print('Buscando ficheros en el servidor...', end='\r')
-    sys.stdout.flush()
 
     response = requests.post(url, headers=headers)
     if response.status_code != 200:
@@ -207,7 +195,19 @@ def file_list(verbose=False):
     print('Buscando ficheros en el servidor... OK')
 
     resultado = response.json()
-    print(resultado)
+
+    lista = resultado['files_list']
+    num = resultado['num_files']
+
+    # Imprime el resultado
+    print('Se han encontrado {} ficheros'.format(num))
+
+    for i in range(0, num):
+        file = lista[i]
+        name = file['fileName']
+        id = file['fileID']
+        print('\tFichero: {} con id {}'.format(name, id))
+
     return resultado
 
 def file_delete(file_id, verbose=False):
@@ -216,7 +216,6 @@ def file_delete(file_id, verbose=False):
     args={'file_id': '{}'.format(file_id)}
 
     print('Eliminando fichero del servidor...', end='\r')
-    sys.stdout.flush()
 
     response = requests.post(url, json=args, headers=headers)
     if response.status_code != 200:
@@ -227,8 +226,10 @@ def file_delete(file_id, verbose=False):
     print('Eliminando fichero del servidor... OK')
 
     resultado = response.json()
-    print(resultado)
-    return resultado
+
+    print('Se ha eliminado el fichero con id {}'.format(resultado['file_id']))
+
+    return resultado['file_id']
 
 
 def _imprime_error(respuesta):
