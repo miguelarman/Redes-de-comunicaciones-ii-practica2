@@ -23,24 +23,7 @@ from Crypto.PublicKey import RSA
 #       /files/delete - borra un fichero
 
 # Funcion que registra un usuario en el sistema
-def user_register(nombre, email, verbose=False):
-
-    print('Generando par de claves RSA de 2048 bits...', end='\r')
-    sys.stdout.flush()
-    key = RSA.generate(2048)
-    print('Generando par de claves RSA de 2048 bits... OK')
-
-    private_key = key.export_key()
-    file_out = open("rsa/privada.pem", "wb")
-    file_out.write(private_key)
-
-    public_key = key.publickey().export_key()
-    file_out = open("rsa/publica.pem", "wb")
-    file_out.write(public_key)
-
-    publicKey = public_key.decode()
-
-    print(publicKey)
+def user_register(nombre, email, publicKey, verbose=False):
 
     url = generales.url_servidor + '/api/users/register'
     args = {
@@ -53,7 +36,6 @@ def user_register(nombre, email, verbose=False):
     if verbose:
         print('Se va a registrar el usuario {} y con email {}'.format(nombre, email))
         print('Registrando al usuario...', end='\r')
-        sys.stdout.flush()
 
     response = requests.post(url, json=args, headers=headers)
     if response.status_code != 200:
@@ -61,7 +43,9 @@ def user_register(nombre, email, verbose=False):
         _imprime_error(response)
         return None
 
-    print('Registrando al usuario... OK')
+    if verbose:
+        print('Registrando al usuario... OK')
+
     resultado = response.json()
 
     return resultado
@@ -73,7 +57,6 @@ def user_getPublicKey(userID, verbose=False):
     headers = generales.header_autorizacion
 
     print('Accediendo a la clave pública del usuario {}...'.format(userID), end='\r')
-    sys.stdout.flush()
 
     response = requests.post(url, json=args, headers=headers)
     if response.status_code != 200:
@@ -98,7 +81,6 @@ def user_search(a_buscar, verbose=False):
 
     if verbose:
         print('Buscando usuario \'{}\' en el servidor...'.format(a_buscar), end='\r')
-        sys.stdout.flush()
 
     response = requests.post(url, json=args, headers=headers)
     if response.status_code != 200:
@@ -129,7 +111,6 @@ def user_delete(userID, verbose=False):
 
     if verbose:
         print('Eliminando el usuario con ID {}...'.format(userID), end='\r')
-        sys.stdout.flush()
 
     response = requests.post(url, json=args, headers=headers)
     if response.status_code != 200:
@@ -148,7 +129,6 @@ def file_upload(file_path, verbose=False):
     args = {'ufile': (file_path, open(file_path, 'rb'))}
 
     print('Subiendo archivo al servidor...', end='\r')
-    sys.stdout.flush()
 
     response = requests.post(url, headers=headers, files=args)
     if response.status_code != 200:
@@ -167,7 +147,6 @@ def file_download(file_id, verbose=False):
     args = {'file_id': '{}'.format(file_id)}
 
     print('Descargando fichero del servidor...', end='\r')
-    sys.stdout.flush()
 
     response = requests.post(url, json=args, headers=headers)
 
@@ -178,25 +157,25 @@ def file_download(file_id, verbose=False):
 
     print('Descargando fichero del servidor... OK')
 
+    filename = response.headers['Content-Disposition'].split('\"')[-2]
+
     print('Guardando fichero...', end='\r')
-    sys.stdout.flush()
-    salida = open(file_id, 'wb')
+    salida = open(filename, 'wb')
     salida.write(response.content)
     salida.close()
 
     print('Guardando fichero... OK')
 
-    writen_bytes = os.path.getsize(file_id)
+    writen_bytes = os.path.getsize(filename)
     print('{} bytes guardados correctamente'.format(writen_bytes))
 
-    return file_id
+    return filename
 
 def file_list(verbose=False):
     url = generales.url_servidor + '/api/files/list'
     headers = generales.header_autorizacion
 
     print('Buscando ficheros en el servidor...', end='\r')
-    sys.stdout.flush()
 
     response = requests.post(url, headers=headers)
     if response.status_code != 200:
@@ -216,7 +195,6 @@ def file_delete(file_id, verbose=False):
     args={'file_id': '{}'.format(file_id)}
 
     print('Eliminando fichero del servidor...', end='\r')
-    sys.stdout.flush()
 
     response = requests.post(url, json=args, headers=headers)
     if response.status_code != 200:
