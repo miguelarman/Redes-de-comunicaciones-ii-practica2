@@ -112,7 +112,7 @@ def user_delete(userID, verbose=False):
     headers = generales.header_autorizacion
 
     if verbose:
-        print('Eliminando el usuario con ID {}...'.format(userID), end='\r')
+        print('Eliminando el usuario...', end='\r')
 
     response = requests.post(url, json=args, headers=headers)
     if response.status_code != 200:
@@ -124,7 +124,9 @@ def user_delete(userID, verbose=False):
 
     id_borrado = resultado['userID']
 
-    print('Eliminando el usuario con ID {}... OK'.format(id_borrado))
+    print('Eliminando el usuario con... OK')
+
+    print('Se ha eliminado el usuario con ID {}'.format(id_borrado))
 
     return id_borrado
 
