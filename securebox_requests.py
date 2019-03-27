@@ -48,7 +48,9 @@ def user_register(nombre, email, publicKey, verbose=False):
 
     resultado = response.json()
 
-    return resultado
+    user_id = resultado['nombre']
+
+    return user_id
 
 # Funcion que se encarga de buscar un usuario por nombre o correo electrónico
 def user_getPublicKey(userID, verbose=False):
@@ -118,10 +120,13 @@ def user_delete(userID, verbose=False):
         _imprime_error(response)
         return None
 
-    print('Eliminando el usuario con ID {}... OK'.format(userID))
     resultado = response.json()
 
-    return resultado
+    id_borrado = resultado['userID']
+
+    print('Eliminando el usuario con ID {}... OK'.format(id_borrado))
+
+    return id_borrado
 
 def file_upload(file_path, verbose=False):
     url = generales.url_servidor + '/api/files/upload'
@@ -139,7 +144,9 @@ def file_upload(file_path, verbose=False):
     print('Subiendo archivo al servidor... OK')
 
     resultado = response.json()
-    return resultado
+    file_id = resultado['file_id']
+
+    return file_id
 
 def file_download(file_id, verbose=False):
     url = generales.url_servidor + '/api/files/download'
@@ -186,7 +193,19 @@ def file_list(verbose=False):
     print('Buscando ficheros en el servidor... OK')
 
     resultado = response.json()
-    print(resultado)
+
+    lista = resultado['files_list']
+    num = resultado['num_files']
+
+    # Imprime el resultado
+    print('Se han encontrado {} ficheros'.format(num))
+
+    for i in range(0, num):
+        file = lista[i]
+        name = file['fileName']
+        id = file['fileID']
+        print('\tFichero: {} con id {}'.format(name, id))
+
     return resultado
 
 def file_delete(file_id, verbose=False):
@@ -205,8 +224,10 @@ def file_delete(file_id, verbose=False):
     print('Eliminando fichero del servidor... OK')
 
     resultado = response.json()
-    print(resultado)
-    return resultado
+
+    print('Se ha eliminado el fichero con id {}'.format(resultado['file_id']))
+
+    return resultado['file_id']
 
 
 def _imprime_error(respuesta):

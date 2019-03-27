@@ -4,6 +4,7 @@ test_python.py
 rsa/*
 *.txt
 *.bin
+prueba*
 fichero_para_cifrar
 fichero_descifrado
 delete_nia.py
