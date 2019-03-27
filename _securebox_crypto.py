@@ -77,17 +77,17 @@ def verify(signed, publickey):
         return False
 
 
-print("prueba de que las cosas funcionan")
-key = RSA.generate(2048)
-pvk = key
-pbk = key.publickey()
-plaintext = "hola pedazo de hijo de puta como estas".encode()
-print("texto plano:",plaintext)
-msg = encrypt(plaintext, pbk)
-print("texto cifrado:",msg)
-nuevo = decrypt(msg, pvk)
-print("texto descifrado:", nuevo)
-
-signed = sign(plaintext, pvk)
-print("cosa firmada:", signed)
-print("se comprueba si la firma es correcta:", verify(signed, pbk))
+# print("prueba de que las cosas funcionan")
+# key = RSA.generate(2048)
+# pvk = key
+# pbk = key.publickey()
+# plaintext = "hola pedazo de hijo de puta como estas".encode()
+# print("texto plano:",plaintext)
+# msg = encrypt(plaintext, pbk)
+# print("texto cifrado:",msg)
+# nuevo = decrypt(msg, pvk)
+# print("texto descifrado:", nuevo)
+#
+# signed = sign(plaintext, pvk)
+# print("cosa firmada:", signed)
+# print("se comprueba si la firma es correcta:", verify(signed, pbk))
