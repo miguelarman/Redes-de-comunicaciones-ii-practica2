@@ -8,19 +8,18 @@ from Crypto.Util.Padding import pad, unpad
 from Crypto.Hash import SHA256
 from Crypto.Signature import pkcs1_15
 
-import generales
-
+from generales import *
 
 """
     Importante: publickey es de tipo RsaKey
 """
 def encrypt(plaintext, publickey):
     # Se genera la clave simetrica
-    session_key = get_random_bytes(generales.AES_KEY_LENGTH)
+    session_key = get_random_bytes(AES_KEY_LENGTH)
 
     # Se encripta el texto plano con la clave simetrica
     cipher_aes = AES.new(session_key, AES.MODE_CBC)
-    ciphertext = cipher_aes.encrypt(pad(plaintext, generales.BLOCK_SIZE))
+    ciphertext = cipher_aes.encrypt(pad(plaintext, BLOCK_SIZE))
 
     # Se obtiene el iv y se encripta la clave simetrica
     cipher_rsa = PKCS1_OAEP.new(publickey)
@@ -45,7 +44,7 @@ def decrypt(enveloped, privatekey):
 
     # Se desencripta el texto cifrado con la clave simetrica
     cipher_aes = AES.new(session_key, AES.MODE_CBC, iv=cipher_iv)
-    plaintext = unpad(cipher_aes.decrypt(ciphertext), generales.BLOCK_SIZE)
+    plaintext = unpad(cipher_aes.decrypt(ciphertext), BLOCK_SIZE)
 
     return plaintext
 
