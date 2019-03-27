@@ -1,4 +1,4 @@
-from securebox_options import parse_options
+from _securebox_options import parse_options, process_options
 
 opts = parse_options()
-ret, err = process_options(opts)
+process_options(opts)
