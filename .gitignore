@@ -2,6 +2,9 @@
 __pycache__
 test_python.py
 rsa/*
+enc/*
+uploads/*
+downloads/*
 *.txt
 *.bin
 prueba*

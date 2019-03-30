@@ -133,7 +133,7 @@ def user_delete(userID, verbose=False):
 def file_upload(file_path, verbose=False):
     url = generales.url_servidor + '/api/files/upload'
     headers = generales.header_autorizacion
-    args = {'ufile': (file_path, open(file_path, 'rb'))}
+    args = {'ufile': (os.path.basename(file_path), open(file_path, 'rb'))}
 
     print('Subiendo archivo al servidor...', end='\r')
 
@@ -147,6 +147,7 @@ def file_upload(file_path, verbose=False):
 
     resultado = response.json()
     file_id = resultado['file_id']
+    print('El id del fichero es ' + str(file_id))
 
     return file_id
 
@@ -164,21 +165,22 @@ def file_download(file_id, verbose=False):
         _imprime_error(response)
         return None
 
-    print('Descargando fichero del servidor... OK')
-
     filename = response.headers['Content-Disposition'].split('\"')[-2]
+    data = response.content
 
-    print('Guardando fichero...', end='\r')
-    salida = open(filename, 'wb')
-    salida.write(response.content)
-    salida.close()
+    # print('Descargando fichero del servidor... OK')
+    #
+    # print('Guardando fichero...', end='\r')
+    # salida = open(filename, 'wb')
+    # salida.write(response.content)
+    # salida.close()
+    #
+    # print('Guardando fichero... OK')
+    #
+    # writen_bytes = os.path.getsize(filename)
+    # print('{} bytes guardados correctamente'.format(writen_bytes))
 
-    print('Guardando fichero... OK')
-
-    writen_bytes = os.path.getsize(filename)
-    print('{} bytes guardados correctamente'.format(writen_bytes))
-
-    return filename
+    return [filename, data]
 
 def file_list(verbose=False):
     url = generales.url_servidor + '/api/files/list'
