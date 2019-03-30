@@ -58,6 +58,9 @@ def sign(plaintext, privatekey):
     signature = pkcs1_15.new(privatekey).sign(hashed_plaintext)
     return signature + plaintext
 
+
+def unsign(signed):
+    return signed[256:]
 """
     Importante: publickey es de tipo RsaKey
 
@@ -75,6 +78,7 @@ def verify(signed, publickey):
         return True
     except:
         return False
+
 
 
 # print("prueba de que las cosas funcionan")
