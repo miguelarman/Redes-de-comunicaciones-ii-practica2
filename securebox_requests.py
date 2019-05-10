@@ -1,28 +1,55 @@
+"""
+    Prácticas de Redes de comunicaciones 2
+
+    Autores:
+        Miguel Arconada Manteca
+        Mario García Pascual
+
+    securebox_requests:
+        En este fichero se definen las funciones auxiliares que se encargan de
+        realizar peticiones al servidor SecureBox aportado:
+            Funciones relacionadas con la gestión de identidades
+               /users/register      - registra un usuario en el sistema
+               /users/getPublicKey  - obtiene la clave pública de un usuario
+               /users/search        - obtiene datos de un usuario por nombre o correo electrónico
+               /user/delete         - borrar un usuario
+           Funciones relacionadas con la gestión de ficheros
+               /files/upload        - sube un fichero al sistema
+               /files/download      - descarga un fichero
+               /files/list          - lista todos los ficheros pertenecientes a un usuario
+               /files/delete        - borra un fichero
+"""
+
 import sys
 import os
 import requests
 import credenciales
 import generales
 import json
+
 from Crypto.PublicKey import RSA
 
 # Falta poner los print solo cuando la flag verbose esté a true
 
 
-# En este fichero se definen las funciones auxiliares que se encargan de cada
-# una de las funcionalidades:
-#   Funciones relacionadas con la gestión de identidades
-#       /users/register - registra un usuario en el sistema
-#       /users/getPublicKey - obtiene la clave pública de un usuario
-#       /users/search - obtiene datos de un usuario por nombre o correo electrónico
-#       /user/delete - borrar un usuario
-#   Funciones relacionadas con la gestión de ficheros
-#       /files/upload - sube un fichero al sistema
-#       /files/download - descarga un fichero
-#       /files/list - lista todos los ficheros pertenecientes a un usuario
-#       /files/delete - borra un fichero
+
 
 # Funcion que registra un usuario en el sistema
+"""
+This is an example of Google style.
+
+Args:
+    nombre: This is the first param.
+    email: This is a second param.
+    publicKey: blabla
+    verbose: blabla
+
+Returns:
+    This is a description of what is returned.
+
+Raises:
+    KeyError: Raises an exception.
+"""
 def user_register(nombre, email, publicKey, verbose=False):
 
     url = generales.url_servidor + '/api/users/register'
@@ -53,6 +80,19 @@ def user_register(nombre, email, publicKey, verbose=False):
     return user_id
 
 # Funcion que se encarga de buscar un usuario por nombre o correo electrónico
+"""
+This is an example of Google style.
+
+Args:
+    userID: This is the first param.
+    verbose: This is a second param.
+
+Returns:
+    This is a description of what is returned.
+
+Raises:
+    KeyError: Raises an exception.
+"""
 def user_getPublicKey(userID, verbose=False):
     url = generales.url_servidor + '/api/users/getPublicKey'
     args = {'userID': userID}
@@ -75,7 +115,19 @@ def user_getPublicKey(userID, verbose=False):
         return None
 
 
-# Funcion que se encarga de buscar un usuario por nombre o correo electrónico
+"""
+This is an example of Google style.
+
+Args:
+    a_buscar: This is the first param.
+    verbose: This is a second param.
+
+Returns:
+    This is a description of what is returned.
+
+Raises:
+    KeyError: Raises an exception.
+"""
 def user_search(a_buscar, verbose=False):
     url = generales.url_servidor + '/api/users/search'
     args = {'data_search': a_buscar}
@@ -105,7 +157,19 @@ def user_search(a_buscar, verbose=False):
 
     return resultados
 
-# Funcion que elimina a un usuario del sistema
+"""
+This is an example of Google style.
+
+Args:
+    userID: This is the first param.
+    verbose: This is a second param.
+
+Returns:
+    This is a description of what is returned.
+
+Raises:
+    KeyError: Raises an exception.
+"""
 def user_delete(userID, verbose=False):
     url = generales.url_servidor + '/api/users/delete'
     args = {'userID': userID}
@@ -130,6 +194,19 @@ def user_delete(userID, verbose=False):
 
     return id_borrado
 
+"""
+This is an example of Google style.
+
+Args:
+    file_path: This is the first param.
+    verbose: This is a second param.
+
+Returns:
+    This is a description of what is returned.
+
+Raises:
+    KeyError: Raises an exception.
+"""
 def file_upload(file_path, verbose=False):
     url = generales.url_servidor + '/api/files/upload'
     headers = generales.header_autorizacion
@@ -151,6 +228,19 @@ def file_upload(file_path, verbose=False):
 
     return file_id
 
+"""
+This is an example of Google style.
+
+Args:
+    file_id: This is the first param.
+    verbose: This is a second param.
+
+Returns:
+    This is a description of what is returned.
+
+Raises:
+    KeyError: Raises an exception.
+"""
 def file_download(file_id, verbose=False):
     url = generales.url_servidor + '/api/files/download'
     headers = generales.header_autorizacion
@@ -182,6 +272,18 @@ def file_download(file_id, verbose=False):
 
     return [filename, data]
 
+"""
+This is an example of Google style.
+
+Args:
+    verbose: This is the first param.
+
+Returns:
+    This is a description of what is returned.
+
+Raises:
+    KeyError: Raises an exception.
+"""
 def file_list(verbose=False):
     url = generales.url_servidor + '/api/files/list'
     headers = generales.header_autorizacion
@@ -212,6 +314,19 @@ def file_list(verbose=False):
 
     return resultado
 
+"""
+This is an example of Google style.
+
+Args:
+    file_id: This is the first param.
+    verbose: This is a second param.
+
+Returns:
+    This is a description of what is returned.
+
+Raises:
+    KeyError: Raises an exception.
+"""
 def file_delete(file_id, verbose=False):
     url = generales.url_servidor + '/api/files/delete'
     headers = generales.header_autorizacion
@@ -233,7 +348,18 @@ def file_delete(file_id, verbose=False):
 
     return resultado['file_id']
 
+"""
+This is an example of Google style.
 
+Args:
+    respuesta: This is the first param.
+
+Returns:
+    This is a description of what is returned.
+
+Raises:
+    KeyError: Raises an exception.
+"""
 def _imprime_error(respuesta):
     try:
         error = respuesta.json()
