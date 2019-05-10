@@ -1,3 +1,11 @@
+"""
+    Prácticas de Redes de comunicaciones 2
+
+    Autores:
+        Miguel Arconada Manteca
+        Mario García Pascual
+"""
+
 import os
 import sys
 
@@ -11,7 +19,14 @@ from Crypto.Signature import pkcs1_15
 from generales import *
 
 """
-    Importante: publickey es de tipo RsaKey
+Funcion de cifrado usando un esquema híbrido.
+
+Args:
+    plaintext (str): El texto plano a cifrar.
+    publickey (RsaKey): La clave pública RSA con la que se quiere cifrar
+
+Returns:
+    Devuelve el IV + Clave simétrica cifrada RSA + Texto cifrado AES
 """
 def encrypt(plaintext, publickey):
     # Se genera la clave simetrica
@@ -30,7 +45,14 @@ def encrypt(plaintext, publickey):
 
 
 """
-    Importante: privatekey es de tipo RsaKey
+Función de descifrado usando un esquema híbrido.
+
+Args:
+    enveloped (str): El sobre a descifrar.
+    privatekey (RsaKey): La clave privada RSA con la que se quiere descifrar
+
+Returns:
+    Devuelve el texto plano obtenido.
 """
 def decrypt(enveloped, privatekey):
     # Sacamos los campos del texto cifrado
@@ -50,7 +72,14 @@ def decrypt(enveloped, privatekey):
 
 
 """
-    Importante: privatekey es de tipo RsaKey
+Función de firmado.
+
+Args:
+    plaintext (str): Texto plano a firmar.
+    privatekey (RsaKey): Clave privada RSA con la que se quiere firmar.
+
+Returns:
+    Devuelve la firma + texto plano.
 """
 def sign(plaintext, privatekey):
     # Se obtiene el hash del texto plano
@@ -59,12 +88,28 @@ def sign(plaintext, privatekey):
     return signature + plaintext
 
 
+"""
+Función que quita la firma de un texto firmado.
+
+Args:
+    signed (str): texto firmado.
+
+Returns:
+    El texto sin la firma.
+"""
 def unsign(signed):
     return signed[256:]
-"""
-    Importante: publickey es de tipo RsaKey
 
-    Devuelve True si la firma es correcta, False en caso contrario
+
+"""
+Función para verificar una firma.
+
+Args:
+    signed (str): texto firmado.
+    publickey (RsaKey): Clave pública RSA con la que se quiere verificar.
+
+Returns:
+    True en el caso de que se verifique la firma; False en caso contrario.
 """
 def verify(signed, publickey):
     # Sacamos los campos
