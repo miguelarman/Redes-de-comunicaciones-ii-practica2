@@ -1,3 +1,29 @@
+"""
+    Prácticas de Redes de comunicaciones 2
+
+    Autores:
+        Miguel Arconada Manteca
+        Mario García Pascual
+
+    securebox_options:
+        En este fichero se implementa el parseo de los argumentos y todas
+        las funcionalidades que tiene el programa a alto nivel. Lo que
+        tiene que ver con criptografia esta en securebox_crypto y lo que tiene
+        que ver con peticinones al servidor en securebox_requests.
+        Las funcionalidades que se implementan son:
+            -crear un id
+            -borrar un id
+            -buscar un id
+            -subir un fichero
+            -descargar un fichero
+            -cifrar un fichero localmente
+            -descifrar un fichero localmente
+            -firmar un fichero localmente
+            -verificar la firma de un fichero localmente
+            -firmar y cifrar un fichero localmente
+            -descifrar y verificar un fichero localmente
+"""
+
 import argparse
 import os
 
@@ -7,6 +33,7 @@ from securebox_requests import *
 from securebox_crypto import *
 from securebox_crypto import *
 
+
 class SecureBoxError(Exception):
     def __init__(self, text):
         self.text = text
@@ -14,6 +41,12 @@ class SecureBoxError(Exception):
     def __str__(self):
         return str(self.text)
 
+"""
+Parsea los argumentos del cliente.
+
+Returns:
+    La estructura que contiene los argumentos del cliente.
+"""
 def parse_options():
     parser = argparse.ArgumentParser(description='Cliente de SecureBox')
 
@@ -38,14 +71,34 @@ def parse_options():
     # Devolvemos los argumentos como diccionario en vez de Namespace
     return parser.parse_args()
 
+"""
+Obtiene la clave publica RSA que esta almacenada localmente.
 
+Returns:
+    La clave publica del usuario.
+"""
 def get_my_publickey():
     return RSA.import_key(open('rsa/publica.pem', 'rb').read())
 
+"""
+Obtiene la clave privada RSA que esta almacenada localmente
+
+Returns:
+    La clave privada del usuario.
+"""
 def get_my_privatekey():
     return RSA.import_key(open('rsa/privada.pem', 'rb').read())
 
 
+"""
+Procesa los argumentos y ejecuta la funcionalidad que corresponda.
+
+Args:
+    opts: Los argumentos del cliente.
+
+Returns:
+    Nada.
+"""
 def process_options(opts):
     try:
         if opts.create_id:
@@ -73,7 +126,18 @@ def process_options(opts):
     except SecureBoxError as e:
         print(e)
 
+"""
+Funcion que implementa la funcionalidad de crear una identidad.
 
+Args:
+    args: los argumentos para crear la identidad.
+
+Returns:
+    Nada.
+
+Raises:
+    SecureBoxError: si los argumentos son invalidos o insuficientes.
+"""
 def process_create_id(args):
     # Se comprueba que los argumentos son validos
     if len(args) is 2:
@@ -110,11 +174,35 @@ def process_create_id(args):
     # La registra en SecureBox
     user_register(nombre, email, publickey.export_key(), verbose=True)
 
+"""
+Funcion que implementa la funcionalidad de buscar una identidad.
+
+Args:
+    cadena (str): identidad que se quiere buscar.
+
+Returns:
+    Nada.
+
+Raises:
+    SecureBoxError: si la cadena introducida es invalida.
+"""
 def process_search_id(cadena):
     if not cadena:
         raise SecureBoxError('Cadena es un argumento obligatorio para buscar una identidad')
     user_search(cadena, verbose=True)
 
+"""
+Funcion que implementa la funcionalidad de borrar una identidad.
+
+Args:
+    id: identidad que se quiere borrar.
+
+Returns:
+    Nada.
+
+Raises:
+    SecureBoxError: si la id introducida es invalida.
+"""
 def process_delete_id(id):
     if not id:
         raise SecureBoxError('Id es un argumento obligatorio para borrar una identidad')
@@ -128,6 +216,19 @@ def process_delete_file(id):
         raise SecureBoxError('Id fichero es un argumento obligatorio para borrar un fichero')
     file_delete(id)
 
+"""
+Funcion que implementa la funcionalidad de subir un fichero.
+
+Args:
+    fichero: ruta del fichero que se quiere subir.
+    dest_id: id del destinatario.
+
+Returns:
+    Nada.
+
+Raises:
+    SecureBoxError: si los argumentos son invalidos o insuficientes.
+"""
 def process_upload(fichero, dest_id):
     if not fichero or not dest_id:
         raise SecureBoxError('Fichero e Id destino son argumentos obligatorios para subir un fichero')
@@ -149,6 +250,21 @@ def process_upload(fichero, dest_id):
 
     file_upload(filename, verbose=True)
 
+"""
+Funcion que implementa la funcionalidad de descargar un fichero.
+
+Args:
+    id: id del fichero que se quiere descargar.
+    source_id: id del emisor del fichero.
+
+Returns:
+    Nada.
+
+Raises:
+    SecureBoxError: si los argumentos son invalidos o insuficientes; si no se
+        ha podido obtener la clave publica; si no se ha podido descargar el
+        fichero; si no se ha podido verificar el fichero descargado.
+"""
 def process_download(id, source_id):
     if not id or not source_id:
         raise SecureBoxError('Id fichero es un argumento obligatorio para descargar un fichero')
@@ -176,7 +292,20 @@ def process_download(id, source_id):
 
 
 
+"""
+Funcion que implementa la funcionalidad de cifrar un fichero localmente.
 
+Args:
+    fichero: ruta del fichero a cifrar.
+    dest_id: id del destinatario.
+
+Returns:
+    Nada.
+
+Raises:
+    SecureBoxError: si los argumentos son insuficientes o invalidos; si no se
+        ha podido obtener la clave publica.
+"""
 def process_encrypt(fichero, dest_id):
     if not fichero or not dest_id:
         raise SecureBoxError('Fichero e Id destino son argumentos obligatorios para cifrar')
@@ -194,7 +323,18 @@ def process_encrypt(fichero, dest_id):
     with open(filename, 'wb') as f:
         f.write(enc_data)
 
+"""
+Funcion que implementa la funcionalidad de firmar un fichero localmente.
 
+Args:
+    fichero: ruta del fichero a firmar.
+
+Returns:
+    Nada.
+
+Raises:
+    SecureBoxError: si el argumento es invalido.
+"""
 def process_sign(fichero):
     if not fichero:
         raise SecureBoxError('Fichero es un argumento obligatorio para firmar un fichero')
@@ -209,7 +349,20 @@ def process_sign(fichero):
     with open(filename, 'wb') as f:
         f.write(sign_data)
 
+"""
+Funcion que implementa la funcionalidad de firmar y cifrar un fichero localmente.
 
+Args:
+    fichero: ruta del fichero a firmar.
+    dest_id: id del destinatario del fichero.
+
+Returns:
+    Nada.
+
+Raises:
+    SecureBoxError: si los argumentos son invalidos o insuficientes: si no se ha
+        podido obtener la clave publica.
+"""
 def process_enc_sign(fichero, dest_id):
     if not fichero or not dest_id:
         raise SecureBoxError('Fichero y Id destino son argumentos obligatorios para cifrar y firmar')
