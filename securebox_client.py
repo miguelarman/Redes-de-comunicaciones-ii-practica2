@@ -10,7 +10,7 @@
         el que se tiene que ejecutar.
 """
 
-from securebox_options import parse_options, process_options
+from src.securebox_options import parse_options, process_options
 
 if __name__ == '__main__':
     opts = parse_options()
