@@ -4,6 +4,15 @@
     Autores:
         Miguel Arconada Manteca
         Mario García Pascual
+
+    securebox_crypto:
+        En este fichero se implementan las funciones criptográficas necesarias
+        para usar el esquema híbrido de la práctica. Estas son:
+            - encrypt,  para cifrar
+            - decrypt,  para descifrar
+            - sign,     para firmar
+            - verify,   para verificar una firma
+            - unsign,   para separar la firma del texto plano
 """
 
 import os
