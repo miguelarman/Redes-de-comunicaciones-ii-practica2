@@ -10,3 +10,4 @@ downloads/*
 prueba*
 fichero_para_cifrar
 fichero_descifrado
+src/__pycache__

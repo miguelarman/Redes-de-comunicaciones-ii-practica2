@@ -69,6 +69,8 @@ def parse_options():
     parser.add_argument('--encrypt', help='Cifra un fichero')
     parser.add_argument('--sign', help='Firma un fichero')
     parser.add_argument('--enc_sign', help='Cifra y firma un fichero')
+    parser.add_argument('--decrypt', help='Descifra un fichero')
+    parser.add_argument('--verify', help='Verifica un fichero firmado')
 
     # Devolvemos los argumentos como diccionario en vez de Namespace
     return parser.parse_args()
@@ -123,6 +125,10 @@ def process_options(opts):
             process_download(opts.download, opts.source_id)
         elif opts.delete_file:
             process_delete_file(opts.delete_file)
+        elif opts.decrypt:
+            process_decrypt(opts.decrypt)
+        elif opts.verify:
+            process_verify(opts.verify, opts.source_id)
         else:
             return None
     except SecureBoxError as e:
@@ -383,3 +389,58 @@ def process_enc_sign(fichero, dest_id):
     os.makedirs(os.path.dirname(filename), exist_ok=True)
     with open(filename, 'wb') as f:
         f.write(enc_sign_data)
+
+"""
+Funcion que implementa la funcionalidad de verificar un fichero localmente.
+
+Args:
+    fichero: ruta del fichero a verificar.
+    source_id: id del origen que queremos verificar.
+
+Returns:
+    Nada.
+
+Raises:
+    SecureBoxError: si los argumentos son invalidos o insuficientes: si no se ha
+        podido obtener la clave publica.
+"""
+def process_verify(fichero, source_id):
+    if not fichero or not source_id:
+        raise SecureBoxError('Fichero e Id origen son argumentos obligatorios para cifrar')
+    ret = user_getPublicKey(source_id, verbose=True)
+    if not ret:
+        raise SecureBoxError('No se ha podido obtener la clave pública del id ' + str(source_id))
+    publickey = RSA.import_key(ret)
+
+    with open(fichero, 'rb') as f:
+        data = f.read()
+    if verify(data, publickey):
+        print('El fichero se ha verificado correctamente')
+    else:
+        print('El fichero no se ha podido verificar')
+
+"""
+Funcion que implementa la funcionalidad de descifrar un fichero localmente.
+
+Args:
+    fichero: ruta del fichero a descifrar.
+
+Returns:
+    Nada.
+
+Raises:
+    SecureBoxError: si los argumentos son invalidos o insuficientes.
+"""
+def process_decrypt(fichero):
+    if not fichero:
+        raise SecureBoxError('Fichero es un argumento obligatorio para descifrar')
+    privatekey = get_my_privatekey()
+
+    with open(fichero, 'rb') as f:
+        enc_data = f.read()
+    data = decrypt(enc_data, privatekey)
+    # Si el fichero es a/b/c.ext lo guardamos en enc/a/b/dec-c.ext
+    filename = 'enc/' + os.path.dirname(fichero) + 'dec-' + os.path.basename(fichero)
+    os.makedirs(os.path.dirname(filename), exist_ok=True)
+    with open(filename, 'wb') as f:
+        f.write(data)

@@ -53,13 +53,13 @@ Raises:
 """
 def user_register(nombre, email, publicKey, verbose=False):
 
-    url = generales.url_servidor + '/api/users/register'
+    url = src.generales.url_servidor + '/api/users/register'
     args = {
         'nombre': nombre,
         'email': email,
         'publicKey': publicKey
     }
-    headers = generales.header_autorizacion
+    headers = src.generales.header_autorizacion
 
     if verbose:
         print('Se va a registrar el usuario {} y con email {}'.format(nombre, email))
@@ -95,9 +95,9 @@ Raises:
     KeyError: Raises an exception.
 """
 def user_getPublicKey(userID, verbose=False):
-    url = generales.url_servidor + '/api/users/getPublicKey'
+    url = src.generales.url_servidor + '/api/users/getPublicKey'
     args = {'userID': userID}
-    headers = generales.header_autorizacion
+    headers = src.generales.header_autorizacion
 
     print('Accediendo a la clave pública del usuario {}...'.format(userID), end='\r')
 
@@ -130,9 +130,9 @@ Raises:
     KeyError: Raises an exception.
 """
 def user_search(a_buscar, verbose=False):
-    url = generales.url_servidor + '/api/users/search'
+    url = src.generales.url_servidor + '/api/users/search'
     args = {'data_search': a_buscar}
-    headers = generales.header_autorizacion
+    headers = src.generales.header_autorizacion
 
     if verbose:
         print('Buscando usuario \'{}\' en el servidor...'.format(a_buscar), end='\r')
@@ -172,9 +172,9 @@ Raises:
     KeyError: Raises an exception.
 """
 def user_delete(userID, verbose=False):
-    url = generales.url_servidor + '/api/users/delete'
+    url = src.generales.url_servidor + '/api/users/delete'
     args = {'userID': userID}
-    headers = generales.header_autorizacion
+    headers = src.generales.header_autorizacion
 
     if verbose:
         print('Eliminando el usuario...', end='\r')
@@ -209,8 +209,8 @@ Raises:
     KeyError: Raises an exception.
 """
 def file_upload(file_path, verbose=False):
-    url = generales.url_servidor + '/api/files/upload'
-    headers = generales.header_autorizacion
+    url = src.generales.url_servidor + '/api/files/upload'
+    headers = src.generales.header_autorizacion
     args = {'ufile': (os.path.basename(file_path), open(file_path, 'rb'))}
 
     print('Subiendo archivo al servidor...', end='\r')
@@ -243,8 +243,8 @@ Raises:
     KeyError: Raises an exception.
 """
 def file_download(file_id, verbose=False):
-    url = generales.url_servidor + '/api/files/download'
-    headers = generales.header_autorizacion
+    url = src.generales.url_servidor + '/api/files/download'
+    headers = src.generales.header_autorizacion
     args = {'file_id': '{}'.format(file_id)}
 
     print('Descargando fichero del servidor...', end='\r')
@@ -286,8 +286,8 @@ Raises:
     KeyError: Raises an exception.
 """
 def file_list(verbose=False):
-    url = generales.url_servidor + '/api/files/list'
-    headers = generales.header_autorizacion
+    url = src.generales.url_servidor + '/api/files/list'
+    headers = src.generales.header_autorizacion
 
     print('Buscando ficheros en el servidor...', end='\r')
 
@@ -329,8 +329,8 @@ Raises:
     KeyError: Raises an exception.
 """
 def file_delete(file_id, verbose=False):
-    url = generales.url_servidor + '/api/files/delete'
-    headers = generales.header_autorizacion
+    url = src.generales.url_servidor + '/api/files/delete'
+    headers = src.generales.header_autorizacion
     args={'file_id': '{}'.format(file_id)}
 
     print('Eliminando fichero del servidor...', end='\r')
